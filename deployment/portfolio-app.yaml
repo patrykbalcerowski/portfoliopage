@@ -1,0 +1,68 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: main-gateway
+  namespace: default
+spec:
+  gatewayClassName: nginx
+  listeners:
+  - name: http
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: Same
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portfolio-demo
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portfolio-demo
+  template:
+    metadata:
+      labels:
+        app: portfolio-demo
+    spec:
+      containers:
+      - name: app
+        image: nginxdemos/hello:plain-text
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portfolio-demo-svc
+  namespace: default
+spec:
+  selector:
+    app: portfolio-demo
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: portfolio-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: main-gateway
+    sectionName: http
+  hostnames:
+  - "portfolio.balc-tech.pl"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: portfolio-demo-svc
+      port: 80
