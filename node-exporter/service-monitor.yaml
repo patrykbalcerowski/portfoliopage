@@ -4,7 +4,7 @@ metadata:
   name: portfolio-demo-monitor
   namespace: default
   labels:
-    release: prometheus
+    release: monitoring-stack
 spec:
   selector:
     matchLabels:
