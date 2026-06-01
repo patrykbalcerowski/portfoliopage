@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: portfolio-demo-svc
+  namespace: default
+  labels:
+    app: portfolio-demo
+spec:
+  selector:
+    app: portfolio-demo
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8082
