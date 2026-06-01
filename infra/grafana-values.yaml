@@ -1,4 +1,10 @@
 grafana:
+  # Włączamy trwały dysk PVC o pojemności 2 Gigabajtów
+  persistence:
+    enabled: true
+    type: pvc
+    size: 2Gi
+
   grafana.ini:
     auth.anonymous:
       enabled: true
@@ -6,11 +12,3 @@ grafana:
       org_role: Viewer
     auth:
       disable_login_form: false
-    dashboards:
-      default_home_dashboard_path: /tmp/dashboards/portfolio.json
-
-  sidecar:
-    dashboards:
-      enabled: true
-      label: grafana_dashboard
-      labelValue: "1"
