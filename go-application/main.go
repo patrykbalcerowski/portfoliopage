@@ -193,7 +193,7 @@ const landingPageHTML = `
     <div class="container">
         <header>
             <h1>Patryk <span>Balcerowski</span></h1>
-            <p class="subtitle">IT & DevOps Engineer | Kubernetes Enthusiast</p>
+            <p class="subtitle">IT & DevOps Engineer</p>
         </header>
 
         <section class="section-card">
