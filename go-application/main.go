@@ -11,6 +11,42 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// Kod HTML Twojej strony startowej
+const landingPageHTML = `
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Patryk Balcerowski</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1e1e2e; color: #cdd6f4; text-align: center; margin-top: 50px; }
+        .container { max-width: 800px; margin: 0 auto; background: #313244; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h1 { color: #89b4fa; }
+        p { font-size: 1.2em; line-height: 1.6; }
+        .links { margin-top: 30px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        a { text-decoration: none; padding: 15px 25px; border-radius: 5px; font-weight: bold; color: #11111b; transition: 0.3s; }
+        .btn-grafana { background-color: #f38ba8; }
+        .btn-argo { background-color: #a6e3a1; }
+        .btn-git { background-color: #fab387; }
+        a:hover { opacity: 0.8; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Witaj w moim klastrze K3s 🚀</h1>
+        <p>Ten projekt to w pełni zautomatyzowane środowisko oparte na podejściu <strong>GitOps</strong>.</p>
+        <p>Zarządzaniem infrastrukturą zajmuje się <strong>ArgoCD</strong>, ruch sieciowy obsługuje <strong>Gateway API (Nginx)</strong>, a za monitoring odpowiada stos <strong>Prometheus + Grafana</strong>. Aplikacja, na którą właśnie patrzysz, została napisana w <strong>Go</strong> i samodzielnie zbiera metryki z Nextcloud.</p>
+        
+        <div class="links">
+            <a href="https://github.com/patrykbalcerowski/portfoliopage" class="btn-git" target="_blank">💻 Repozytorium GitHub</a>
+            <a href="https://argocd.balc-tech.pl" class="btn-argo" target="_blank">🐙 ArgoCD (GitOps)</a>
+            <a href="https://grafana.balc-tech.pl" class="btn-grafana" target="_blank">📊 Grafana (Monitoring)</a>
+        </div>
+    </div>
+</body>
+</html>
+`
 
 var (
 	activeUsers = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -30,7 +66,6 @@ var (
 		Help: "Rozmiar bazy danych",
 	})
 )
-
 
 func init() {
 	prometheus.MustRegister(activeUsers)
@@ -55,15 +90,26 @@ func main() {
 
 	handler := http.NewServeMux()
 
-	
+	// Istniejące endpointy
 	handler.HandleFunc("GET /metrics", metricsHandler(baseURL, username, password))
-
 	handler.HandleFunc("GET /status", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "OK")
 	})
 
+	// NOWY ENDPOINT: Serwowanie strony startowej
+	handler.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		// Zapobiegamy wyłapywaniu zapytań o np. /favicon.ico jako strony głównej
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		fmt.Fprint(w, landingPageHTML)
+	})
+
 	fmt.Println("Serwer uruchomiony na porcie :8082")
+	fmt.Println("Odwiedź http://localhost:8082/ aby zobaczyć stronę główną")
 	fmt.Println("Odwiedź http://localhost:8082/metrics aby zobaczyć dane")
 
 	server := http.Server{
@@ -75,7 +121,6 @@ func main() {
 		fmt.Printf("Błąd serwera: %v\n", err)
 	}
 }
-
 
 func metricsHandler(baseURL, username, password string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
