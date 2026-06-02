@@ -13,7 +13,7 @@ spec:
       labels:
         app: portfolio-demo
       annotations:
-        deployed-at: "2026-06-02-v2"
+        deployed-at: "2026-06-02-v3"
     spec:
       containers:
       - name: app
