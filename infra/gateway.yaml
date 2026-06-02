@@ -24,7 +24,7 @@ spec:
     namespace: default
     sectionName: http
   hostnames:
-  - "portfolio.balc-tech.pl"
+  - "grafana.balc-tech.pl"
   rules:
   - matches:
     - path:
@@ -32,4 +32,45 @@ spec:
         value: /
     backendRefs:
     - name: monitoring-stack-grafana
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: landing-page-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: main-gateway
+    sectionName: http
+  hostnames:
+  - "portfolio.balc-tech.pl"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: portfolio-demo-svc
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-route
+  namespace: argocd
+spec:
+  parentRefs:
+  - name: main-gateway
+    namespace: default
+    sectionName: http
+  hostnames:
+  - "argocd.balc-tech.pl"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: argocd-server
       port: 80
