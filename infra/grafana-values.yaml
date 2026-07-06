@@ -1,5 +1,4 @@
 grafana:
-  # Włączamy trwały dysk PVC o pojemności 2 Gigabajtów
   persistence:
     enabled: true
     type: pvc
@@ -12,3 +11,7 @@ grafana:
       org_role: Viewer
     auth:
       disable_login_form: false
+prometheus:
+  prometheusSpec:
+    retention: 24h
+    retentionSize: "5GB"
